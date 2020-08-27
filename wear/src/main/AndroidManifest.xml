@@ -1,38 +1,67 @@
 <?xml version="1.0" encoding="utf-8"?>
 <manifest xmlns:android="http://schemas.android.com/apk/res/android"
-    package="com.tkoyat.myapplication">
+  package="com.tkoyat.miniwatchface">
 
-    <uses-permission android:name="android.permission.WAKE_LOCK" />
+  <uses-feature android:name="android.hardware.type.watch" /> <!-- Required to act as a custom watch face. -->
+  <uses-permission android:name="android.permission.ACCESS_COARSE_LOCATION" />
+  <uses-permission android:name="android.permission.ACCESS_FINE_LOCATION" />
+  <uses-permission android:name="android.permission.ACCESS_BACKGROUND_LOCATION" />
+  <uses-permission android:name="android.permission.INTERNET" />
+  <uses-permission android:name="android.permission.ACCESS_NETWORK_STATE" />
 
-    <uses-feature android:name="android.hardware.type.watch" />
+  <uses-permission android:name="android.permission.WAKE_LOCK" />
 
-    <application
-        android:allowBackup="true"
-        android:icon="@mipmap/ic_launcher"
-        android:label="@string/app_name"
-        android:supportsRtl="true"
-        android:theme="@android:style/Theme.DeviceDefault">
-        <uses-library
-            android:name="com.google.android.wearable"
-            android:required="true" />
+  <uses-permission android:name="com.google.android.wearable.permission.RECEIVE_COMPLICATION_DATA" /><!-- Required for complications to receive complication data and open the provider chooser. -->
 
-        <!--
-               Set to true if your app is Standalone, that is, it does not require the handheld
-               app to run.
-        -->
-        <meta-data
-            android:name="com.google.android.wearable.standalone"
-            android:value="true" />
+  <application
+    android:allowBackup="true"
+    android:icon="@mipmap/ic_launcher"
+    android:label="@string/app_name"
+    android:supportsRtl="true"
+    android:theme="@style/PixelWatchFace">
 
-        <activity
-            android:name=".MainActivity"
-            android:label="@string/app_name">
-            <intent-filter>
-                <action android:name="android.intent.action.MAIN" />
+    <activity android:name="android.support.wearable.activity.ConfirmationActivity" />
 
-                <category android:name="android.intent.category.LAUNCHER" />
-            </intent-filter>
-        </activity>
-    </application>
+    <activity
+      android:launchMode="singleInstance"
+      android:name=".ui.WeatherUpdateActivity" />
+
+    <activity
+      android:launchMode="singleInstance"
+      android:name=".ui.CompanionNotifyActivity" />
+
+    <activity
+      android:launchMode="singleInstance"
+      android:name=".ui.WatchPermissionRequestActivity" />
+
+    <meta-data
+      android:name="com.google.android.gms.version"
+      android:value="@integer/google_play_services_version" />
+
+    <meta-data
+      android:name="com.google.android.wearable.standalone"
+      android:value="true" />
+
+    <service
+      android:label="@string/my_digital_name"
+      android:name=".ui.PixelWatchFace"
+      android:permission="android.permission.BIND_WALLPAPER">
+      <intent-filter>
+        <action android:name="android.service.wallpaper.WallpaperService" />
+
+        <category android:name="com.google.android.wearable.watchface.category.WATCH_FACE" />
+      </intent-filter>
+
+      <meta-data
+        android:name="com.google.android.wearable.watchface.preview"
+        android:resource="@drawable/preview_new" />
+
+
+      <meta-data
+        android:name="android.service.wallpaper"
+        android:resource="@xml/watch_face" />
+    </service>
+  </application>
+
 
 </manifest>

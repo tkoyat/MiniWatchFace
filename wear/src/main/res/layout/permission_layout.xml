@@ -1,0 +1,76 @@
+<?xml version="1.0" encoding="utf-8"?>
+<androidx.wear.widget.BoxInsetLayout xmlns:android="http://schemas.android.com/apk/res/android"
+  xmlns:app="http://schemas.android.com/apk/res-auto"
+  android:layout_width="match_parent"
+  android:layout_height="match_parent"
+  android:background="@color/background">
+
+  <ScrollView
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    app:boxedEdges="left|right">
+
+    <LinearLayout
+      android:layout_width="match_parent"
+      android:layout_height="wrap_content"
+      android:layout_gravity="center"
+      android:orientation="vertical">
+
+      <TextView
+        android:id="@+id/textView"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="8dp"
+        android:fontFamily="@font/product_sans_regular"
+        android:text="Location permissions are required to enable weather. Request now?"
+        android:textAlignment="center"
+        android:textColor="@color/digital_text"
+        android:textSize="16sp" />
+
+      <androidx.constraintlayout.widget.ConstraintLayout
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:layout_margin="4dp">
+
+
+        <androidx.wear.widget.CircularProgressLayout
+          android:id="@+id/circular_progress"
+          android:layout_width="wrap_content"
+          android:layout_height="wrap_content"
+          android:padding="4dp"
+          app:colorSchemeColors="@color/circular_button_pressed"
+          app:layout_constraintBottom_toBottomOf="parent"
+          app:layout_constraintEnd_toEndOf="parent"
+          app:strokeWidth="4dp">
+          <com.google.android.material.floatingactionbutton.FloatingActionButton
+            android:id="@+id/locationRequestPositive"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+
+            android:clickable="true"
+            app:backgroundTint="@color/circular_button_normal"
+            app:borderWidth="0dp"
+            app:fabCustomSize="40dp"
+            app:layout_constraintBottom_toBottomOf="parent"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:srcCompat="@drawable/ic_cc_checkmark" />
+        </androidx.wear.widget.CircularProgressLayout>
+
+        <com.google.android.material.floatingactionbutton.FloatingActionButton
+          android:id="@+id/locationRequestNegative"
+          android:layout_width="wrap_content"
+          android:layout_height="wrap_content"
+          android:layout_marginStart="4dp"
+          android:clickable="true"
+          app:backgroundTint="@color/circular_button_disabled"
+          app:borderWidth="0dp"
+          app:fabCustomSize="40dp"
+          app:layout_constraintBottom_toBottomOf="@+id/circular_progress"
+          app:layout_constraintStart_toStartOf="parent"
+          app:layout_constraintTop_toTopOf="@+id/circular_progress"
+          app:srcCompat="@drawable/ic_cc_clear" />
+
+      </androidx.constraintlayout.widget.ConstraintLayout>
+    </LinearLayout>
+  </ScrollView>
+</androidx.wear.widget.BoxInsetLayout>

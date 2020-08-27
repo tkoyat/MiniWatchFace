@@ -1,34 +1,56 @@
 apply plugin: 'com.android.application'
 
 android {
-    compileSdkVersion 30
-    buildToolsVersion "30.0.2"
-
+    compileSdkVersion 29
+    viewBinding.enabled = true
     defaultConfig {
-        applicationId "com.tkoyat.myapplication"
-        minSdkVersion 26
-        targetSdkVersion 30
-        versionCode 1
-        versionName "1.0"
-
+        applicationId "com.tkoyat.miniwatchface"
+        minSdkVersion 23
+        targetSdkVersion 29
+        versionCode 1069
+        versionName "1.5.5.1"
+        multiDexEnabled true
     }
-
+    compileOptions {
+        coreLibraryDesugaringEnabled true
+        sourceCompatibility JavaVersion.VERSION_1_8
+        targetCompatibility JavaVersion.VERSION_1_8
+    }
     buildTypes {
         release {
-            minifyEnabled false
-            proguardFiles getDefaultProguardFile('proguard-android-optimize.txt'), 'proguard-rules.pro'
+            minifyEnabled true
+            shrinkResources true
+            proguardFiles getDefaultProguardFile('proguard-android.txt'), 'proguard-rules.pro'
         }
     }
 }
 
 dependencies {
-    implementation fileTree(dir: "libs", include: ["*.jar"])
-    implementation 'com.google.android.support:wearable:2.7.0'
-    implementation 'com.google.android.gms:play-services-wearable:17.0.0'
-    implementation 'androidx.percentlayout:percentlayout:1.0.0'
+    implementation fileTree(dir: 'libs', include: ['*.jar'])
+    implementation 'androidx.appcompat:appcompat:1.1.0'
+
+    coreLibraryDesugaring 'com.android.tools:desugar_jdk_libs:1.0.5'
+
     implementation 'androidx.legacy:legacy-support-v4:1.0.0'
-    implementation 'androidx.recyclerview:recyclerview:1.1.0'
+    implementation 'androidx.preference:preference:1.1.1'
     implementation 'androidx.wear:wear:1.0.0'
+    implementation 'androidx.work:work-runtime:2.3.4'
+    implementation 'androidx.concurrent:concurrent-futures:1.1.0-alpha01'
+    implementation 'androidx.constraintlayout:constraintlayout:2.0.0-beta6'
+
+    implementation 'com.google.android.gms:play-services-wearable:17.0.0'
+    implementation 'com.google.android.gms:play-services-location:17.0.0'
+
+    implementation 'com.android.volley:volley:1.1.1'
+
+    implementation 'com.google.android.support:wearable:2.7.0'
     compileOnly 'com.google.android.wearable:wearable:2.7.0'
-    wearApp project(":wear")
+    implementation 'com.google.android.material:material:1.1.0'
+
+    implementation 'com.google.code.gson:gson:2.8.6'
+
+    implementation 'com.luckycatlabs:SunriseSunsetCalculator:1.2'
+    // library for METAR parsing
+    implementation 'ca.braunit.weatherparser:WeatherParser:0.2.0'
+
 }

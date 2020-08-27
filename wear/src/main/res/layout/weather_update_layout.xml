@@ -1,0 +1,50 @@
+<?xml version="1.0" encoding="utf-8"?>
+<androidx.wear.widget.BoxInsetLayout xmlns:android="http://schemas.android.com/apk/res/android"
+  xmlns:app="http://schemas.android.com/apk/res-auto"
+  android:layout_width="match_parent"
+  android:layout_height="match_parent"
+  android:background="@color/background">
+
+  <ScrollView
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    app:boxedEdges="left|right">
+
+    <LinearLayout
+      android:layout_width="match_parent"
+      android:layout_height="wrap_content"
+      android:layout_gravity="center"
+      android:orientation="vertical">
+
+
+      <TextView
+        android:id="@+id/weatherUpdateTextView"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="8dp"
+        android:fontFamily="@font/product_sans_regular"
+        android:text="Due to development costs, weather can now be enabled in the companion app"
+        android:textAlignment="center"
+        android:textColor="@color/digital_text"
+        android:textSize="16sp" />
+
+      <com.google.android.material.floatingactionbutton.FloatingActionButton
+        android:id="@+id/weatherUpdateConfirm"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+
+        android:layout_marginTop="4dp"
+        android:layout_marginBottom="8dp"
+        android:layout_gravity="center_horizontal"
+        android:clickable="true"
+        app:backgroundTint="@color/circular_button_normal"
+        app:borderWidth="0dp"
+        app:fabCustomSize="40dp"
+        app:srcCompat="@drawable/ic_arrow_forward" />
+
+
+    </LinearLayout>
+
+  </ScrollView>
+
+</androidx.wear.widget.BoxInsetLayout>

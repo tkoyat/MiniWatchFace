@@ -6,7 +6,7 @@ android {
 
 
     defaultConfig {
-        applicationId "com.corvettecole.pixelwatchface"
+        applicationId "com.tkoyat.miniwatchface"
         minSdkVersion 21
         targetSdkVersion 29
         versionCode 35
