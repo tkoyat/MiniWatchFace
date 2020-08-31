@@ -160,27 +160,31 @@ public class MediaLoader {
 
     @Override
     protected Void doInBackground(Intent... intent) {
-      if (intent == null || intent.length < 1 || intent[0] == null || intent[0].getData() == null) {
-        // This happens if the Activity wasn't started with the right intent.
-        errorText = "No URI specified. Using default panorama.";
-        Log.e(TAG, errorText);
-        return null;
-      }
+//      if (intent == null || intent.length < 1 || intent[0] == null || intent[0].getData() == null) {
+//        // This happens if the Activity wasn't started with the right intent.
+//        errorText = "No URI specified. Using default panorama.";
+//        Log.e(TAG, errorText);
+//        return null;
+//      }
 
       // Extract the stereoFormat from the Intent's extras.
-      int stereoFormat = intent[0].getIntExtra(MEDIA_FORMAT_KEY, Mesh.MEDIA_MONOSCOPIC);
-      if (stereoFormat != Mesh.MEDIA_STEREO_LEFT_RIGHT
-          && stereoFormat != Mesh.MEDIA_STEREO_TOP_BOTTOM) {
-        stereoFormat = Mesh.MEDIA_MONOSCOPIC;
-      }
-
-      mesh = Mesh.createUvSphere(
-          SPHERE_RADIUS_METERS, DEFAULT_SPHERE_ROWS, DEFAULT_SPHERE_COLUMNS,
-          DEFAULT_SPHERE_VERTICAL_DEGREES, DEFAULT_SPHERE_HORIZONTAL_DEGREES,
-          stereoFormat);
+//      int stereoFormat = intent[0].getIntExtra(MEDIA_FORMAT_KEY, Mesh.MEDIA_MONOSCOPIC);
+//      if (stereoFormat != Mesh.MEDIA_STEREO_LEFT_RIGHT
+//              && stereoFormat != Mesh.MEDIA_STEREO_TOP_BOTTOM) {
+//        stereoFormat = Mesh.MEDIA_MONOSCOPIC;
+//      }
+//
+//      mesh = Mesh.createUvSphere(
+//              SPHERE_RADIUS_METERS, DEFAULT_SPHERE_ROWS, DEFAULT_SPHERE_COLUMNS,
+//              DEFAULT_SPHERE_VERTICAL_DEGREES, DEFAULT_SPHERE_HORIZONTAL_DEGREES,
+//              stereoFormat);
 
       // Based on the Intent's data, load the appropriate media from disk.
-      Uri uri = intent[0].getData();
+//      Uri uri = intent[0].getData();
+
+//      String mUriStr = "file:///sdcard/Pictures/VID_20200831.mp4";
+      String mUriStr = "https://timgsa.baidu.com/timg?image&quality=80&size=b9999_10000&sec=1598896432437&di=ecd2d844dfe9326aec0added54300975&imgtype=0&src=http%3A%2F%2Fa2.att.hudong.com%2F36%2F48%2F19300001357258133412489354717.jpg";
+      Uri uri = Uri.parse(mUriStr);
       try {
         File file = new File(uri.getPath());
         if (!file.exists()) {
@@ -211,6 +215,60 @@ public class MediaLoader {
       displayWhenReady();
       return null;
     }
+
+
+//    protected Void doInBackground(Intent... intent) {
+//      if (intent == null || intent.length < 1 || intent[0] == null || intent[0].getData() == null) {
+//        // This happens if the Activity wasn't started with the right intent.
+//        errorText = "No URI specified. Using default panorama.";
+//        Log.e(TAG, errorText);
+//        return null;
+//      }
+//
+//      // Extract the stereoFormat from the Intent's extras.
+//      int stereoFormat = intent[0].getIntExtra(MEDIA_FORMAT_KEY, Mesh.MEDIA_MONOSCOPIC);
+//      if (stereoFormat != Mesh.MEDIA_STEREO_LEFT_RIGHT
+//          && stereoFormat != Mesh.MEDIA_STEREO_TOP_BOTTOM) {
+//        stereoFormat = Mesh.MEDIA_MONOSCOPIC;
+//      }
+//
+//      mesh = Mesh.createUvSphere(
+//          SPHERE_RADIUS_METERS, DEFAULT_SPHERE_ROWS, DEFAULT_SPHERE_COLUMNS,
+//          DEFAULT_SPHERE_VERTICAL_DEGREES, DEFAULT_SPHERE_HORIZONTAL_DEGREES,
+//          stereoFormat);
+//
+//      // Based on the Intent's data, load the appropriate media from disk.
+//      Uri uri = intent[0].getData();
+//      try {
+//        File file = new File(uri.getPath());
+//        if (!file.exists()) {
+//          throw new FileNotFoundException();
+//        }
+//
+//        String type = URLConnection.guessContentTypeFromName(uri.getPath());
+//        if (type == null) {
+//          throw new InvalidParameterException("Unknown file type: " + uri);
+//        } else if (type.startsWith("image")) {
+//          // Decoding a large image can take 100+ ms.
+//          mediaImage = BitmapFactory.decodeFile(uri.getPath());
+//        } else if (type.startsWith("video")) {
+//          MediaPlayer mp = MediaPlayer.create(context, uri);
+//          synchronized (MediaLoader.this) {
+//            // This needs to be synchronized with the methods that could clear mediaPlayer.
+//            mediaPlayer = mp;
+//          }
+//        } else {
+//          throw new InvalidParameterException("Unsupported MIME type: " + type);
+//        }
+//
+//      } catch (IOException | InvalidParameterException e) {
+//        errorText = String.format("Error loading file [%s]: %s", uri.getPath(), e);
+//        Log.e(TAG, errorText);
+//      }
+//
+//      displayWhenReady();
+//      return null;
+//    }
 
     @Override
     public void onPostExecute(Void unused) {

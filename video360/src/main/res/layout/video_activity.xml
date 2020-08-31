@@ -24,7 +24,7 @@
 
   <include
     android:layout_width="match_parent"
-    android:layout_height="48dp"
+    android:layout_height="0dp"
     layout="@layout/video_ui"
     android:visibility="gone"/>
 </LinearLayout>

@@ -91,8 +91,8 @@ public class VideoUiView extends LinearLayout {
     view.setVisibility(View.VISIBLE);
     parent.addView(view, 0);
 
-    view.findViewById(R.id.enter_exit_vr).setContentDescription(
-        view.getResources().getString(R.string.exit_vr_label));
+//    view.findViewById(R.id.enter_exit_vr).setContentDescription(
+//        view.getResources().getString(R.string.exit_vr_label));
 
     return view;
   }
@@ -159,38 +159,38 @@ public class VideoUiView extends LinearLayout {
   public void onFinishInflate() {
     super.onFinishInflate();
 
-    final ImageButton playPauseToggle = (ImageButton) findViewById(R.id.play_pause_toggle);
-    playPauseToggle.setOnClickListener(
-        new OnClickListener() {
-          @Override
-          public void onClick(View v) {
-            if (mediaPlayer == null) {
-              return;
-            }
+//    final ImageButton playPauseToggle = (ImageButton) findViewById(R.id.play_pause_toggle);
+//    playPauseToggle.setOnClickListener(
+//        new OnClickListener() {
+//          @Override
+//          public void onClick(View v) {
+//            if (mediaPlayer == null) {
+//              return;
+//            }
+//
+//            if (mediaPlayer.isPlaying()) {
+//              mediaPlayer.pause();
+//              playPauseToggle.setBackgroundResource(R.drawable.play_button);
+//              playPauseToggle.setContentDescription(getResources().getString(R.string.play_label));
+//            } else {
+//              mediaPlayer.start();
+//              playPauseToggle.setBackgroundResource(R.drawable.pause_button);
+//              playPauseToggle.setContentDescription(getResources().getString(R.string.pause_label));
+//            }
+//          }
+//        });
 
-            if (mediaPlayer.isPlaying()) {
-              mediaPlayer.pause();
-              playPauseToggle.setBackgroundResource(R.drawable.play_button);
-              playPauseToggle.setContentDescription(getResources().getString(R.string.play_label));
-            } else {
-              mediaPlayer.start();
-              playPauseToggle.setBackgroundResource(R.drawable.pause_button);
-              playPauseToggle.setContentDescription(getResources().getString(R.string.pause_label));
-            }
-          }
-        });
-
-    seekBar = (SeekBar) findViewById(R.id.seek_bar);
-    seekBar.setOnSeekBarChangeListener(new SeekBarListener());
-
-    statusText = (TextView) findViewById(R.id.status_text);
+//    seekBar = (SeekBar) findViewById(R.id.seek_bar);
+//    seekBar.setOnSeekBarChangeListener(new SeekBarListener());
+//
+//    statusText = (TextView) findViewById(R.id.status_text);
   }
 
   /** Sets the OnClickListener used to switch Activities. */
   @MainThread
   public void setVrIconClickListener(OnClickListener listener) {
-    ImageButton vrIcon = (ImageButton) findViewById(R.id.enter_exit_vr);
-    vrIcon.setOnClickListener(listener);
+//    ImageButton vrIcon = (ImageButton) findViewById(R.id.enter_exit_vr);
+//    vrIcon.setOnClickListener(listener);
   }
 
   /**

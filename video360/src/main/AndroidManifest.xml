@@ -32,12 +32,12 @@
         android:value="true" />
 
     <activity
-        android:name=".VrVideoActivity"
-        android:configChanges="orientation|keyboardHidden|screenSize|uiMode|navigation"
+        android:name=".VideoActivity"
+        android:icon="@drawable/icon"
         android:label="@string/app_name"
         android:launchMode="singleTask"
-        android:resizeableActivity="false"
-        android:screenOrientation="landscape">
+        android:screenOrientation="portrait">
+      <!-- This Activity only shows up in the 2D launcher.  -->
       <intent-filter>
         <action android:name="android.intent.action.MAIN" />
         <category android:name="android.intent.category.LAUNCHER" />

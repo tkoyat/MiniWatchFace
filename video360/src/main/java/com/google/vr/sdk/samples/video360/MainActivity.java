@@ -4,6 +4,8 @@ import android.os.Bundle;
 import android.support.wearable.activity.WearableActivity;
 import android.widget.TextView;
 
+
+// Default wear activity
 public class MainActivity extends WearableActivity {
     private TextView mTextView;
 
