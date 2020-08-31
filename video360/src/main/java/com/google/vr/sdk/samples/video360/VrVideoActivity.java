@@ -24,6 +24,7 @@ import android.opengl.Matrix;
 import android.os.Bundle;
 //import android.support.annotation.MainThread;
 //import android.support.v4.content.ContextCompat;
+import android.support.wearable.activity.WearableActivity;
 import android.util.Log;
 import android.util.Pair;
 import android.view.View;
@@ -51,7 +52,8 @@ import javax.microedition.khronos.egl.EGLConfig;
  * The default intent for this Activity will load a 360 placeholder panorama. For more options on
  * how to load other media using a custom Intent, see {@link MediaLoader}.
  */
-public class VrVideoActivity extends GvrActivity {
+public class VrVideoActivity extends WearableActivity {
+//public class VrVideoActivity extends GvrActivity {
   private static final String TAG = "VrVideoActivity";
 
   private static final int EXIT_FROM_VR_REQUEST_CODE = 42;
