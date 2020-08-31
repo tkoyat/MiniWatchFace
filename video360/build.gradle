@@ -53,4 +53,8 @@ dependencies {
     // library for METAR parsing
     implementation 'ca.braunit.weatherparser:WeatherParser:0.2.0'
 
+    implementation 'com.google.vr:sdk-base:1.190.0'
 }
+
+
+

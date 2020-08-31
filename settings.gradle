@@ -1,3 +1,4 @@
 include ':wear'
 include ':mobile'
+include ':video360'
 rootProject.name = "MiniWatchFace"
