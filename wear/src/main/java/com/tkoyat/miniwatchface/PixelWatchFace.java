@@ -360,6 +360,15 @@ public class PixelWatchFace extends CanvasWatchFaceService {
       //canvas.drawColor(Color.BLACK);  // test not drawing background every render pass
       canvas.drawRect(0, 0, bounds.width(), bounds.height(), mBackgroundPaint);
 
+      // draw battery percentage
+      if (mSettings.isShowBattery()) {
+        String battery = String.format("%d%%", mBatteryLevel);
+        float batteryXOffset = computeBatteryXOffset(battery, mInfoPaint, bounds);
+        float batteryYOffset = computeBatteryYOffset(battery, mInfoPaint, bounds);
+
+        canvas.drawText(battery, batteryXOffset, batteryYOffset, mInfoPaint);
+      }
+
       long now = System.currentTimeMillis();
 
       // Create locale specific time string.
@@ -387,73 +396,65 @@ public class PixelWatchFace extends CanvasWatchFaceService {
       float bitmapTotalMargin = mCurrentWeather.getIconBitmap(getApplicationContext()).getWidth()
           / WEATHER_ICON_MARGIN_RATIO;
 
-      if (!mSettings.isWeatherDisabled()) {
-        if (mSettings.isShowTemperature()) {
-          temperatureText = mCurrentWeather.getFormattedTemperature(mSettings.isUseCelsius(),
-              mSettings.isShowTemperatureFractional());
-          if (mSettings.isShowWeatherIcon()) {
-            totalLength =
-                dateTextLength + bitmapTotalMargin + mCurrentWeather
-                    .getIconBitmap(getApplicationContext())
-                    .getWidth() + mInfoPaint.measureText(temperatureText);
-          } else {
-            totalLength =
-                dateTextLength + bitmapTotalMargin + mInfoPaint.measureText(temperatureText);
-          }
-        } else if (mSettings.isShowWeatherIcon()) {
-          totalLength = dateTextLength + bitmapTotalMargin / 2.0f + mCurrentWeather
-              .getIconBitmap(getApplicationContext()).getWidth();
-        }
-      }
+//      if (!mSettings.isWeatherDisabled()) {
+//        if (mSettings.isShowTemperature()) {
+//          temperatureText = mCurrentWeather.getFormattedTemperature(mSettings.isUseCelsius(),
+//              mSettings.isShowTemperatureFractional());
+//          if (mSettings.isShowWeatherIcon()) {
+//            totalLength =
+//                dateTextLength + bitmapTotalMargin + mCurrentWeather
+//                    .getIconBitmap(getApplicationContext())
+//                    .getWidth() + mInfoPaint.measureText(temperatureText);
+//          } else {
+//            totalLength =
+//                dateTextLength + bitmapTotalMargin + mInfoPaint.measureText(temperatureText);
+//          }
+//        } else if (mSettings.isShowWeatherIcon()) {
+//          totalLength = dateTextLength + bitmapTotalMargin / 2.0f + mCurrentWeather
+//              .getIconBitmap(getApplicationContext()).getWidth();
+//        }
+//      }
 
-      float infoBarXOffset = centerX - (totalLength / 2.0f);
-      float infoBarYOffset = computeInfoBarYOffset(dateText, mInfoPaint, timeTextBounds,
-          timeYOffset);
-
-      // draw infobar
-      if (mSettings.isShowInfoBarAmbient() || !mAmbient) {
-        canvas.drawText(dateText, infoBarXOffset, infoBarYOffset, mInfoPaint);
-        if (!mSettings.isWeatherDisabled()) {
-          if (mSettings.isShowWeatherIcon() && mCurrentWeather != null) {
-            canvas.drawBitmap(mCurrentWeather.getIconBitmap(getApplicationContext()),
-                infoBarXOffset + (dateTextLength + bitmapTotalMargin / 2.0f),
-                infoBarYOffset
-                    - mCurrentWeather.getIconBitmap(getApplicationContext()).getHeight()
-                    / WEATHER_ICON_Y_OFFSET_RATIO,
-                null);
-            canvas.drawText(temperatureText,
-                infoBarXOffset + (dateTextLength + bitmapTotalMargin + mCurrentWeather
-                    .getIconBitmap(getApplicationContext()).getWidth()), infoBarYOffset,
-                mInfoPaint);
-          } else if (!mSettings.isShowWeatherIcon() && mSettings.isShowTemperature()
-              && mCurrentWeather != null) {
-            canvas.drawText(temperatureText, infoBarXOffset + (dateTextLength + bitmapTotalMargin),
-                infoBarYOffset, mInfoPaint);
-          }
-        }
-      }
-
-      // draw battery percentage
-      if (mSettings.isShowBattery()) {
-        String battery = String.format("%d%%", mBatteryLevel);
-        float batteryXOffset = computeXOffset(battery, mInfoPaint, bounds);
-        float batteryYOffset = computeBatteryYOffset(battery, mInfoPaint, bounds);
-
-        canvas.drawText(battery, batteryXOffset, batteryYOffset, mInfoPaint);
-      }
+//      float infoBarXOffset = centerX - (totalLength / 2.0f);
+//      float infoBarYOffset = computeInfoBarYOffset(dateText, mInfoPaint, timeTextBounds,
+//          timeYOffset);
+//
+//      // draw infobar
+//      if (mSettings.isShowInfoBarAmbient() || !mAmbient) {
+//        canvas.drawText(dateText, infoBarXOffset, infoBarYOffset, mInfoPaint);
+////        if (!mSettings.isWeatherDisabled()) {
+////          if (mSettings.isShowWeatherIcon() && mCurrentWeather != null) {
+////            canvas.drawBitmap(mCurrentWeather.getIconBitmap(getApplicationContext()),
+////                infoBarXOffset + (dateTextLength + bitmapTotalMargin / 2.0f),
+////                infoBarYOffset
+////                    - mCurrentWeather.getIconBitmap(getApplicationContext()).getHeight()
+////                    / WEATHER_ICON_Y_OFFSET_RATIO,
+////                null);
+////            canvas.drawText(temperatureText,
+////                infoBarXOffset + (dateTextLength + bitmapTotalMargin + mCurrentWeather
+////                    .getIconBitmap(getApplicationContext()).getWidth()), infoBarYOffset,
+////                mInfoPaint);
+////          } else if (!mSettings.isShowWeatherIcon() && mSettings.isShowTemperature()
+////              && mCurrentWeather != null) {
+////            canvas.drawText(temperatureText, infoBarXOffset + (dateTextLength + bitmapTotalMargin),
+////                infoBarYOffset, mInfoPaint);
+////          }
+////        }
+//      }
 
       // draw wearOS icon
-      if (mSettings.isShowWearIcon()) {
-        if (mAmbient) {
-          float mIconXOffset = bounds.exactCenterX() - (mWearOSBitmapAmbient.getWidth() / 2.0f);
-          float mIconYOffset = timeYOffset / 4.0f;
-          canvas.drawBitmap(mWearOSBitmapAmbient, mIconXOffset, mIconYOffset, null);
-        } else {
-          float mIconXOffset = bounds.exactCenterX() - (mWearOSBitmap.getWidth() / 2.0f);
-          float mIconYOffset = timeYOffset / 4.0f;
-          canvas.drawBitmap(mWearOSBitmap, mIconXOffset, mIconYOffset, null);
-        }
-      }
+//      if (mSettings.isShowWearIcon()) {
+//        if (mAmbient) {
+//          float mIconXOffset = bounds.exactCenterX() - (mWearOSBitmapAmbient.getWidth() / 2.0f);
+//          float mIconYOffset = timeYOffset / 4.0f;
+//          canvas.drawBitmap(mWearOSBitmapAmbient, mIconXOffset, mIconYOffset, null);
+//        } else {
+//          float mIconXOffset = bounds.exactCenterX() - (mWearOSBitmap.getWidth() / 2.0f);
+//          float mIconYOffset = timeYOffset / 4.0f;
+//          canvas.drawBitmap(mWearOSBitmap, mIconXOffset, mIconYOffset, null);
+//        }
+//      }
+
       checkAndLaunchDialogs();
     }
 
@@ -592,6 +593,20 @@ public class PixelWatchFace extends CanvasWatchFaceService {
       }
     }
 
+    private float computeBatteryXOffset(String text, Paint paint, Rect watchBounds) {
+//      float centerX = watchBounds.exactCenterX();
+      float rightX = watchBounds.width() / 1.0f;
+      float textLength = paint.measureText(text);
+//      return centerX - (textLength / 2.0f);
+      return (rightX - textLength - 20);
+    }
+
+    private float computeBatteryYOffset(String batteryText, Paint batteryPaint, Rect watchBounds) {
+      Rect textBounds = new Rect();
+      batteryPaint.getTextBounds(batteryText, 0, batteryText.length(), textBounds);
+//      return (watchBounds.bottom - mChinSize) - textBounds.height();
+      return (watchBounds.top + mChinSize + 20) + textBounds.height();
+    }
 
     private float computeXOffset(String text, Paint paint, Rect watchBounds) {
       float centerX = watchBounds.exactCenterX();
@@ -602,8 +617,8 @@ public class PixelWatchFace extends CanvasWatchFaceService {
 
     private float computeTimeYOffset(Rect textBounds, Rect watchBounds) {
       if (mSettings.isShowWearIcon() || (!mSettings.isShowInfoBarAmbient() && mAmbient)) {
-        return watchBounds.exactCenterY() + (textBounds.height()
-            / 4.0f);
+//        return watchBounds.exactCenterY() + (textBounds.height() / 4.0f);
+        return watchBounds.height() - (textBounds.height() / 4.0f);
       }
       // this positions the time in the exact center but generally looks... off. So we will position
       // it slightly up to look more right
@@ -611,7 +626,8 @@ public class PixelWatchFace extends CanvasWatchFaceService {
 //        return watchBounds.exactCenterY() + (textBounds.height() / 2.0f);
 //      }
       else {
-        return watchBounds.exactCenterY();
+//        return watchBounds.exactCenterY();
+        return watchBounds.height() - (textBounds.height() / 4.0f) - mChinSize;
       }
     }
 
@@ -620,12 +636,6 @@ public class PixelWatchFace extends CanvasWatchFaceService {
       Rect textBounds = new Rect();
       datePaint.getTextBounds(dateText, 0, dateText.length(), textBounds);
       return textBounds.height() * INFO_BAR_Y_SPACING_RATIO + timeTextYOffset;
-    }
-
-    private float computeBatteryYOffset(String batteryText, Paint batteryPaint, Rect watchBounds) {
-      Rect textBounds = new Rect();
-      batteryPaint.getTextBounds(batteryText, 0, batteryText.length(), textBounds);
-      return (watchBounds.bottom - mChinSize) - textBounds.height();
     }
 
     @Override
