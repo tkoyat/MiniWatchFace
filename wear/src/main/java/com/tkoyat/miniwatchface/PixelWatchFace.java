@@ -1,4 +1,4 @@
-package com.tkoyat.miniwatchface.ui;
+package com.tkoyat.miniwatchface;
 
 import static com.tkoyat.miniwatchface.util.Constants.INFO_BAR_Y_SPACING_RATIO;
 import static com.tkoyat.miniwatchface.util.Constants.KEY_WEATHER_JSON;
@@ -49,6 +49,9 @@ import androidx.work.WorkInfo;
 import androidx.work.WorkManager;
 import com.tkoyat.miniwatchface.R;
 import com.tkoyat.miniwatchface.models.Weather;
+import com.tkoyat.miniwatchface.ui.CompanionNotifyActivity;
+import com.tkoyat.miniwatchface.ui.WatchPermissionRequestActivity;
+import com.tkoyat.miniwatchface.ui.WeatherUpdateActivity;
 import com.tkoyat.miniwatchface.util.Constants.UpdatesRequired;
 import com.tkoyat.miniwatchface.util.Settings;
 import com.tkoyat.miniwatchface.util.UnitLocale;
@@ -182,8 +185,7 @@ public class PixelWatchFace extends CanvasWatchFaceService {
       mTimePaint = new Paint();
       mTimePaint.setTypeface(mProductSans);
       mTimePaint.setAntiAlias(true);
-      mTimePaint.setColor(
-          ContextCompat.getColor(getApplicationContext(), R.color.digital_text));
+      mTimePaint.setColor(ContextCompat.getColor(getApplicationContext(), R.color.digital_text));
       mTimePaint.setStrokeWidth(3f);
 
       mInfoPaint = new Paint();
