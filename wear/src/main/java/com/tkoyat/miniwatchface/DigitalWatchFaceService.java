@@ -363,8 +363,8 @@ public class DigitalWatchFaceService extends CanvasWatchFaceService {
                     DigitalWatchFaceUtil.COLOR_VALUE_DEFAULT_AND_AMBIENT_MINUTE_DIGITS);
             // Actually, the seconds are not rendered in the ambient mode, so we could pass just any
             // value as ambientColor here.
-            adjustPaintColorToCurrentMode(mSecondPaint, mInteractiveSecondDigitsColor,
-                    DigitalWatchFaceUtil.COLOR_VALUE_DEFAULT_AND_AMBIENT_SECOND_DIGITS);
+//            adjustPaintColorToCurrentMode(mSecondPaint, mInteractiveSecondDigitsColor,
+//                    DigitalWatchFaceUtil.COLOR_VALUE_DEFAULT_AND_AMBIENT_SECOND_DIGITS);
 
             if (mLowBitAmbient) {
                 boolean antiAlias = !inAmbientMode;
@@ -487,9 +487,10 @@ public class DigitalWatchFaceService extends CanvasWatchFaceService {
 
             // In ambient and mute modes, always draw the first colon. Otherwise, draw the
             // first colon for the first half of each second.
-            if (isInAmbientMode() || mMute || mShouldDrawColons) {
-                canvas.drawText(COLON_STRING, x, mYOffset, mColonPaint);
-            }
+//            if (isInAmbientMode() || mMute || mShouldDrawColons) {
+//                canvas.drawText(COLON_STRING, x, mYOffset, mColonPaint);
+//            }
+            canvas.drawText(COLON_STRING, x, mYOffset, mColonPaint);
             x += mColonWidth;
 
             // Draw the minutes.
@@ -499,29 +500,27 @@ public class DigitalWatchFaceService extends CanvasWatchFaceService {
 
             // In unmuted interactive mode, draw a second blinking colon followed by the seconds.
             // Otherwise, if we're in 12-hour mode, draw AM/PM
-            if (!isInAmbientMode() && !mMute) {
-                if (mShouldDrawColons) {
-                    canvas.drawText(COLON_STRING, x, mYOffset, mColonPaint);
-                }
-                x += mColonWidth;
-                canvas.drawText(formatTwoDigitNumber(
-                        mCalendar.get(Calendar.SECOND)), x, mYOffset, mSecondPaint);
-            } else if (!is24Hour) {
-                x += mColonWidth;
-                canvas.drawText(getAmPmString(
-                        mCalendar.get(Calendar.AM_PM)), x, mYOffset, mAmPmPaint);
-            }
+//            if (!isInAmbientMode() && !mMute) {
+//                if (mShouldDrawColons) {
+//                    canvas.drawText(COLON_STRING, x, mYOffset, mColonPaint);
+//                }
+//                x += mColonWidth;
+//                canvas.drawText(formatTwoDigitNumber(mCalendar.get(Calendar.SECOND)), x, mYOffset, mSecondPaint);
+//            } else if (!is24Hour) {
+//                x += mColonWidth;
+//                canvas.drawText(getAmPmString(mCalendar.get(Calendar.AM_PM)), x, mYOffset, mAmPmPaint);
+//            }
 
             // Only render the day of week and date if there is no peek card, so they do not bleed
             // into each other in ambient mode.
             if (getPeekCardPosition().isEmpty()) {
-                // Day of week
-                canvas.drawText(
-                        mDayOfWeekFormat.format(mDate),
-                        mXOffset, mYOffset + mLineHeight, mDatePaint);
                 // Date
                 canvas.drawText(
                         mDateFormat.format(mDate),
+                        mXOffset, mYOffset + mLineHeight, mDatePaint);
+                // Day of week
+                canvas.drawText(
+                        mDayOfWeekFormat.format(mDate),
                         mXOffset, mYOffset + mLineHeight * 2, mDatePaint);
             }
         }
