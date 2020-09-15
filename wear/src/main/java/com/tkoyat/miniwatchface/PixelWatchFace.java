@@ -70,11 +70,15 @@ import com.google.android.gms.wearable.PutDataMapRequest;
 import com.google.android.gms.wearable.Wearable;
 import com.google.gson.Gson;
 import java.lang.ref.WeakReference;
+import java.util.Calendar;
 import java.util.Locale;
 import java.util.concurrent.TimeUnit;
 
 
 public class PixelWatchFace extends CanvasWatchFaceService {
+
+  private static final Typeface NORMAL_TYPEFACE =
+          Typeface.create(Typeface.SANS_SERIF, Typeface.NORMAL);
 
   /**
    * Update rate in milliseconds for interactive mode. Defaults to one minute because the watch face
@@ -136,6 +140,16 @@ public class PixelWatchFace extends CanvasWatchFaceService {
     private Paint mTimePaint;
     private Paint mInfoPaint;
     private int mBatteryLevel;
+    Calendar mCalendar;
+
+    float mXOffset;
+    float mYOffset;
+
+    Paint mDatePaint;
+    Paint mHourPaint;
+    Paint mMinutePaint;
+    Paint mSecondPaint;
+
     /**
      * Whether the display supports fewer bits for each color in ambient mode. When true, we disable
      * anti-aliasing in ambient mode.
@@ -194,9 +208,32 @@ public class PixelWatchFace extends CanvasWatchFaceService {
       mInfoPaint.setColor(ContextCompat.getColor(getApplicationContext(), R.color.digital_text));
       mInfoPaint.setStrokeWidth(2f);
 
+
+
+      mDatePaint = createTextPaint(ContextCompat.getColor(getApplicationContext(), R.color.white));
+      mHourPaint = createTextPaint(ContextCompat.getColor(getApplicationContext(), R.color.white));
+      mMinutePaint = createTextPaint(ContextCompat.getColor(getApplicationContext(), R.color.white));
+      mSecondPaint = createTextPaint(ContextCompat.getColor(getApplicationContext(), R.color.white));
+
+
+
+      mCalendar = Calendar.getInstance();
+
       if (shouldSuggestSettings()) {
         setSuggestedSettings();
       }
+    }
+
+    private Paint createTextPaint(int defaultInteractiveColor) {
+      return createTextPaint(defaultInteractiveColor, NORMAL_TYPEFACE);
+    }
+
+    private Paint createTextPaint(int defaultInteractiveColor, Typeface typeface) {
+      Paint paint = new Paint();
+      paint.setColor(defaultInteractiveColor);
+      paint.setTypeface(typeface);
+      paint.setAntiAlias(true);
+      return paint;
     }
 
     @Override
@@ -289,6 +326,9 @@ public class PixelWatchFace extends CanvasWatchFaceService {
       mIsRound = insets.isRound();
       mChinSize = insets.getSystemWindowInsetBottom();
 
+      mXOffset = resources.getDimension(mIsRound? R.dimen.digital_x_offset_round : R.dimen.digital_x_offset);
+      mYOffset = resources.getDimension(R.dimen.digital_y_offset);
+
       float timeTextSize = resources.getDimension(mIsRound
           ? R.dimen.digital_time_text_size_round : R.dimen.digital_time_text_size);
       float dateTextSize = resources.getDimension(mIsRound
@@ -347,6 +387,10 @@ public class PixelWatchFace extends CanvasWatchFaceService {
       super.onSurfaceChanged(holder, format, width, height);
     }
 
+    private String formatTwoDigitNumber(int hour) {
+      return String.format("%02d", hour);
+    }
+
 
     // TODO massively optimize this so that calculations and object allocation etc etc are not
     // performed here (this needs to run as fast as possible)
@@ -369,32 +413,101 @@ public class PixelWatchFace extends CanvasWatchFaceService {
         canvas.drawText(battery, batteryXOffset, batteryYOffset, mInfoPaint);
       }
 
+      // Create locale specific time string.
       long now = System.currentTimeMillis();
+      mCalendar.setTimeInMillis(now);
+      boolean is24Hour = DateFormat.is24HourFormat(PixelWatchFace.this);
+
+      // Draw the hours.
+      float x = mXOffset;
+      String hourString;
+      if (is24Hour) {
+        hourString = formatTwoDigitNumber(mCalendar.get(Calendar.HOUR_OF_DAY));
+      } else {
+        int hour = mCalendar.get(Calendar.HOUR);
+        if (hour == 0) {
+          hour = 12;
+        }
+        hourString = String.valueOf(hour);
+      }
+      canvas.drawText(hourString, x, mYOffset, mTimePaint);
+//      canvas.drawText(hourString, x, mYOffset, mHourPaint);
+      x += mHourPaint.measureText(hourString);
+
+      // In ambient and mute modes, always draw the first colon. Otherwise, draw the
+      // first colon for the first half of each second.
+//      if (isInAmbientMode() || mMute || mShouldDrawColons) {
+//        canvas.drawText(COLON_STRING, x, mYOffset, mColonPaint);
+//      }
+//      x += mColonWidth;
+
+      // Draw the minutes.
+      mYOffset = mYOffset + 80;
+      String minuteString = formatTwoDigitNumber(mCalendar.get(Calendar.MINUTE));
+      canvas.drawText(minuteString, x, mYOffset, mTimePaint);
+      x += mMinutePaint.measureText(minuteString);
+
+      // In unmuted interactive mode, draw a second blinking colon followed by the seconds.
+      // Otherwise, if we're in 12-hour mode, draw AM/PM
+//      if (!isInAmbientMode() && !mMute) {
+//        if (mShouldDrawColons) {
+//          canvas.drawText(COLON_STRING, x, mYOffset, mColonPaint);
+//        }
+//        x += mColonWidth;
+//        canvas.drawText(formatTwoDigitNumber(
+//                mCalendar.get(Calendar.SECOND)), x, mYOffset, mSecondPaint);
+//      } else if (!is24Hour) {
+//        x += mColonWidth;
+//        canvas.drawText(getAmPmString(
+//                mCalendar.get(Calendar.AM_PM)), x, mYOffset, mAmPmPaint);
+//      }
 
       // Create locale specific time string.
-      java.text.DateFormat timeFormat = DateFormat.getTimeFormat(getApplicationContext());
-      String timeText = timeFormat.format(now).replaceAll("[A-Z|\\s]", ""); // this also removes AM/PM if present
+//      long now = System.currentTimeMillis();
+//      mCalendar.setTimeInMillis(now);
+//      boolean is24Hour = DateFormat.is24HourFormat(PixelWatchFace.this);
+//
+//      String hourString;
+//      if (is24Hour) {
+//        hourString = formatTwoDigitNumber(mCalendar.get(Calendar.HOUR_OF_DAY));
+//      } else {
+//        int hour = mCalendar.get(Calendar.HOUR);
+//        if (hour == 0) {
+//          hour = 12;
+//        }
+//        hourString = String.valueOf(hour);
+//      }
+//
+//      float mHourXOffset = computeHourXOffset(hourString, mTimePaint, bounds);
+//      Rect mHourTextBounds = new Rect();
+//      mTimePaint.getTextBounds(hourString, 0, hourString.length(), mHourTextBounds);
+//      float mHourYOffset = computeHourYOffset(mHourTextBounds, bounds);
+//      canvas.drawText(hourString, mHourXOffset, mHourYOffset, mTimePaint);
 
-      float mTimeXOffset = computeXOffset(timeText, mTimePaint, bounds);
-
-      Rect timeTextBounds = new Rect();
-      mTimePaint.getTextBounds(timeText, 0, timeText.length(), timeTextBounds);
-      float timeYOffset = computeTimeYOffset(timeTextBounds, bounds);
-
-      canvas.drawText(timeText, mTimeXOffset, timeYOffset, mTimePaint);
+//      java.text.DateFormat timeFormat = DateFormat.getTimeFormat(getApplicationContext());
+//      String timeText = timeFormat.format(now).replaceAll("[A-Z|\\s]", ""); // this also removes AM/PM if present
+//
+//      float mTimeXOffset = computeXOffset(timeText, mTimePaint, bounds);
+//
+//      Rect timeTextBounds = new Rect();
+//      mTimePaint.getTextBounds(timeText, 0, timeText.length(), timeTextBounds);
+//      float timeYOffset = computeTimeYOffset(timeTextBounds, bounds);
+//
+//      canvas.drawText(hourString, mTimeXOffset, timeYOffset, mTimePaint);
+//      canvas.drawText(timeText, mTimeXOffset, timeYOffset, mTimePaint);
 
       // Create locale specific date string.
-      String dateFormat = DateFormat.getBestDateTimePattern(Locale.getDefault(), "EEEMMMd");
-      String dateText = DateFormat.format(dateFormat, now).toString();
+//      String dateFormat = DateFormat.getBestDateTimePattern(Locale.getDefault(), "EEEMMMd");
+//      String dateText = DateFormat.format(dateFormat, now).toString();
+//
+//      String temperatureText = "";
 
-      String temperatureText = "";
-
-      float centerX = bounds.exactCenterX();
-      float dateTextLength = mInfoPaint.measureText(dateText);
-      float totalLength = dateTextLength;
-
-      float bitmapTotalMargin = mCurrentWeather.getIconBitmap(getApplicationContext()).getWidth()
-          / WEATHER_ICON_MARGIN_RATIO;
+//      float centerX = bounds.exactCenterX();
+//      float dateTextLength = mInfoPaint.measureText(dateText);
+//      float totalLength = dateTextLength;
+//
+//      float bitmapTotalMargin = mCurrentWeather.getIconBitmap(getApplicationContext()).getWidth()
+//          / WEATHER_ICON_MARGIN_RATIO;
 
 //      if (!mSettings.isWeatherDisabled()) {
 //        if (mSettings.isShowTemperature()) {
@@ -606,6 +719,28 @@ public class PixelWatchFace extends CanvasWatchFaceService {
       batteryPaint.getTextBounds(batteryText, 0, batteryText.length(), textBounds);
 //      return (watchBounds.bottom - mChinSize) - textBounds.height();
       return (watchBounds.top + mChinSize + 20) + textBounds.height();
+    }
+
+    private float computeHourXOffset(String text, Paint paint, Rect watchBounds) {
+      float centerX = watchBounds.exactCenterX();
+      float textLength = paint.measureText(text);
+      return centerX - (textLength / 2.0f);
+    }
+
+    private float computeHourYOffset(Rect textBounds, Rect watchBounds) {
+      if (mSettings.isShowWearIcon() || (!mSettings.isShowInfoBarAmbient() && mAmbient)) {
+//        return watchBounds.exactCenterY() + (textBounds.height() / 4.0f);
+        return watchBounds.height() - (textBounds.height() / 4.0f);
+      }
+      // this positions the time in the exact center but generally looks... off. So we will position
+      // it slightly up to look more right
+//      else if (!mSettings.isShowInfoBarAmbient() && mAmbient) {
+//        return watchBounds.exactCenterY() + (textBounds.height() / 2.0f);
+//      }
+      else {
+//        return watchBounds.exactCenterY();
+        return watchBounds.height() - (textBounds.height() / 4.0f) - mChinSize;
+      }
     }
 
     private float computeXOffset(String text, Paint paint, Rect watchBounds) {
