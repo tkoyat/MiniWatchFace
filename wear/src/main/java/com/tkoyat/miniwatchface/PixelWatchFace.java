@@ -77,6 +77,8 @@ import java.util.concurrent.TimeUnit;
 
 public class PixelWatchFace extends CanvasWatchFaceService {
 
+  private static final String TAG = "PixelWatchFace";
+
   private static final Typeface NORMAL_TYPEFACE =
           Typeface.create(Typeface.SANS_SERIF, Typeface.NORMAL);
 
@@ -246,8 +248,9 @@ public class PixelWatchFace extends CanvasWatchFaceService {
 
     @Override
     public void onComplicationDataUpdate(int watchFaceComplicationId, ComplicationData data) {
-      String TAG = "onComplicationDataUpdate";
-      //Log.d(TAG, watchFaceComplicationId + ", type: " + data.getType());
+//      String TAG1 = "onComplicationDataUpdate";
+
+      Log.d(TAG, watchFaceComplicationId + ", aaa type: " + data.getType());
       if (watchFaceComplicationId == BATTERY_COMPLICATION_ID) {
         mBatteryLevel = (int) data.getValue();
         invalidate();
@@ -405,6 +408,7 @@ public class PixelWatchFace extends CanvasWatchFaceService {
       canvas.drawRect(0, 0, bounds.width(), bounds.height(), mBackgroundPaint);
 
       // draw battery percentage
+      Log.d(TAG, "battery" + ", mBatteryLevel: " + mBatteryLevel);
       if (mSettings.isShowBattery()) {
         String battery = String.format("%d%%", mBatteryLevel);
         float batteryXOffset = computeBatteryXOffset(battery, mInfoPaint, bounds);
@@ -442,7 +446,7 @@ public class PixelWatchFace extends CanvasWatchFaceService {
 //      x += mColonWidth;
 
       // Draw the minutes.
-      mYOffset = mYOffset + 80;
+//      mYOffset = mYOffset + 80;
       String minuteString = formatTwoDigitNumber(mCalendar.get(Calendar.MINUTE));
       canvas.drawText(minuteString, x, mYOffset, mTimePaint);
       x += mMinutePaint.measureText(minuteString);

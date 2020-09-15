@@ -29,6 +29,7 @@ import android.os.Bundle;
 import android.os.Handler;
 import android.os.Message;
 import android.support.wearable.complications.ComplicationData;
+import android.support.wearable.complications.SystemProviders;
 import android.support.wearable.watchface.CanvasWatchFaceService;
 import android.support.wearable.watchface.WatchFaceService;
 import android.support.wearable.watchface.WatchFaceStyle;
@@ -212,12 +213,19 @@ public class DigitalWatchFaceService extends CanvasWatchFaceService {
             if (Log.isLoggable(TAG, Log.DEBUG)) {
                 Log.d(TAG, "onCreate");
             }
+            Log.d(TAG, "onCreate log");
             super.onCreate(holder);
+
+            // Called when new complication data is received.
+            setDefaultSystemComplicationProvider(BATTERY_COMPLICATION_ID, SystemProviders.WATCH_BATTERY,
+                    ComplicationData.TYPE_RANGED_VALUE);
 
             setWatchFaceStyle(new WatchFaceStyle.Builder(DigitalWatchFaceService.this)
                     .setCardPeekMode(WatchFaceStyle.PEEK_MODE_VARIABLE)
                     .setBackgroundVisibility(WatchFaceStyle.BACKGROUND_VISIBILITY_INTERRUPTIVE)
                     .setShowSystemUiTime(false)
+                    .setAcceptsTapEvents(true)
+                    .setHideNotificationIndicator(true)
                     .build());
             Resources resources = DigitalWatchFaceService.this.getResources();
             mYOffset = resources.getDimension(R.dimen.digital_y_offset);
@@ -269,10 +277,16 @@ public class DigitalWatchFaceService extends CanvasWatchFaceService {
 
         @Override
         public void onComplicationDataUpdate(int watchFaceComplicationId, ComplicationData data) {
-            String TAG = "onComplicationDataUpdate";
-            //Log.d(TAG, watchFaceComplicationId + ", type: " + data.getType());
+//            if (Log.isLoggable(TAG, Log.DEBUG)) {
+//                Log.d(TAG, "watchFaceComplicationId: " + watchFaceComplicationId);
+//            }
+//            String TAG = "onComplicationDataUpdate";
+            Log.d(TAG, watchFaceComplicationId + ", bbtype: " + data.getType());
             if (watchFaceComplicationId == BATTERY_COMPLICATION_ID) {
                 mBatteryLevel = (int) data.getValue();
+//                if (Log.isLoggable(TAG, Log.DEBUG)) {
+                Log.d(TAG, "onComplicationDataUpdate: " + mBatteryLevel);
+//                }
                 invalidate();
             }
         }
@@ -317,6 +331,8 @@ public class DigitalWatchFaceService extends CanvasWatchFaceService {
             if (mRegisteredReceiver) {
                 return;
             }
+            // The id of the complication that the data relates to.
+            setActiveComplications(BATTERY_COMPLICATION_ID);
             mRegisteredReceiver = true;
             IntentFilter filter = new IntentFilter(Intent.ACTION_TIMEZONE_CHANGED);
             filter.addAction(Intent.ACTION_LOCALE_CHANGED);
