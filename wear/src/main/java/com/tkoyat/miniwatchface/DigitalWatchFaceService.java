@@ -36,8 +36,10 @@ import android.text.format.DateFormat;
 import android.util.Log;
 import android.view.SurfaceHolder;
 import android.view.WindowInsets;
+import androidx.core.content.res.ResourcesCompat;
 
 import androidx.core.content.ContextCompat;
+import androidx.core.content.res.ResourcesCompat;
 
 import com.tkoyat.miniwatchface.util.DigitalWatchFaceUtil;
 import com.google.android.gms.common.ConnectionResult;
@@ -189,6 +191,11 @@ public class DigitalWatchFaceService extends CanvasWatchFaceService {
         private int mBatteryLevel;
         private Paint mInfoPaint;
 
+        private Typeface mProductSans;
+        private Typeface mProductSansThin;
+
+
+
         /**
          * Whether the display supports fewer bits for each color in ambient mode. When true, we
          * disable anti-aliasing in ambient mode.
@@ -220,17 +227,22 @@ public class DigitalWatchFaceService extends CanvasWatchFaceService {
 
             mBackgroundPaint = new Paint();
             mBackgroundPaint.setColor(mInteractiveBackgroundColor);
-            mDatePaint = createTextPaint(
-                    ContextCompat.getColor(getApplicationContext(), R.color.digital_date));
+            mDatePaint = createTextPaint(ContextCompat.getColor(getApplicationContext(), R.color.digital_date));
             mHourPaint = createTextPaint(mInteractiveHourDigitsColor, BOLD_TYPEFACE);
             mMinutePaint = createTextPaint(mInteractiveMinuteDigitsColor);
             mSecondPaint = createTextPaint(mInteractiveSecondDigitsColor);
-            mAmPmPaint = createTextPaint(
-                    ContextCompat.getColor(getApplicationContext(), R.color.digital_am_pm));
-            mColonPaint = createTextPaint(
-                    ContextCompat.getColor(getApplicationContext(), R.color.digital_colons));
-            mInfoPaint = createTextPaint(
-                    ContextCompat.getColor(getApplicationContext(), R.color.digital_date));
+            mAmPmPaint = createTextPaint(ContextCompat.getColor(getApplicationContext(), R.color.digital_am_pm));
+            mColonPaint = createTextPaint(ContextCompat.getColor(getApplicationContext(), R.color.digital_colons));
+
+
+            mProductSans = ResourcesCompat.getFont(getApplicationContext(), R.font.product_sans_regular);
+            mProductSansThin = ResourcesCompat.getFont(getApplicationContext(), R.font.product_sans_thin);
+
+            mInfoPaint = createTextPaint(ContextCompat.getColor(getApplicationContext(), R.color.digital_date));
+//            mInfoPaint = createTextPaint(mInteractiveHourDigitsColor, BOLD_TYPEFACE);
+            mHourPaint.setTypeface(mProductSans);
+            mHourPaint.setAntiAlias(true);
+            mHourPaint.setStrokeWidth(2f);
 
             mCalendar = Calendar.getInstance();
             mDate = new Date();
@@ -337,6 +349,7 @@ public class DigitalWatchFaceService extends CanvasWatchFaceService {
                     ? R.dimen.digital_am_pm_size_round : R.dimen.digital_am_pm_size);
 
             mDatePaint.setTextSize(resources.getDimension(R.dimen.digital_date_text_size));
+            mInfoPaint.setTextSize(resources.getDimension(R.dimen.digital_date_text_size));
             mHourPaint.setTextSize(textSize);
             mMinutePaint.setTextSize(textSize);
             mSecondPaint.setTextSize(textSize);
@@ -427,6 +440,7 @@ public class DigitalWatchFaceService extends CanvasWatchFaceService {
                 mMinutePaint.setAlpha(alpha);
                 mColonPaint.setAlpha(alpha);
                 mAmPmPaint.setAlpha(alpha);
+                mInfoPaint.setAlpha(alpha);
                 invalidate();
             }
         }
@@ -499,17 +513,17 @@ public class DigitalWatchFaceService extends CanvasWatchFaceService {
 
             // draw battery percentage
 //            if (mSettings.isShowBattery()) {
-//            String battery = String.format("%d%%", mBatteryLevel);
-//            float batteryXOffset = computeBatteryXOffset(battery, mInfoPaint, bounds);
-//            float batteryYOffset = computeBatteryYOffset(battery, mInfoPaint, bounds);
-//
-//            canvas.drawText(battery, batteryXOffset, batteryYOffset, mInfoPaint);
-
             String battery = String.format("%d%%", mBatteryLevel);
-            float batteryXOffset = computeBatteryXOffset(battery, mDatePaint, bounds);
-            float batteryYOffset = computeBatteryYOffset(battery, mDatePaint, bounds);
+            float batteryXOffset = computeBatteryXOffset(battery, mInfoPaint, bounds);
+            float batteryYOffset = computeBatteryYOffset(battery, mInfoPaint, bounds);
 
-            canvas.drawText(battery, batteryXOffset, batteryYOffset, mDatePaint);
+            canvas.drawText(battery, batteryXOffset, batteryYOffset, mInfoPaint);
+
+//            String battery = String.format("%d%%", mBatteryLevel);
+//            float batteryXOffset = computeBatteryXOffset(battery, mDatePaint, bounds);
+//            float batteryYOffset = computeBatteryYOffset(battery, mDatePaint, bounds);
+//
+//            canvas.drawText(battery, batteryXOffset, batteryYOffset, mDatePaint);
 //            }
 
             long now = System.currentTimeMillis();
