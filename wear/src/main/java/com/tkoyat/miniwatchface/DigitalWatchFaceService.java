@@ -28,6 +28,7 @@ import android.graphics.Typeface;
 import android.os.Bundle;
 import android.os.Handler;
 import android.os.Message;
+import android.support.wearable.complications.ComplicationData;
 import android.support.wearable.watchface.CanvasWatchFaceService;
 import android.support.wearable.watchface.WatchFaceService;
 import android.support.wearable.watchface.WatchFaceStyle;
@@ -69,6 +70,8 @@ import java.util.concurrent.TimeUnit;
 public class DigitalWatchFaceService extends CanvasWatchFaceService {
     private static final String TAG = "DigitalWatchFaceService";
 
+    private final int BATTERY_COMPLICATION_ID = 20;
+
     private static final Typeface BOLD_TYPEFACE =
             Typeface.create(Typeface.SANS_SERIF, Typeface.BOLD);
     private static final Typeface NORMAL_TYPEFACE =
@@ -92,6 +95,9 @@ public class DigitalWatchFaceService extends CanvasWatchFaceService {
 
     private class Engine extends CanvasWatchFaceService.Engine implements DataApi.DataListener,
             GoogleApiClient.ConnectionCallbacks, GoogleApiClient.OnConnectionFailedListener {
+
+
+
         static final String COLON_STRING = ":";
 
         /** Alpha value for drawing time when in mute mode. */
@@ -180,6 +186,9 @@ public class DigitalWatchFaceService extends CanvasWatchFaceService {
         int mInteractiveSecondDigitsColor =
                 DigitalWatchFaceUtil.COLOR_VALUE_DEFAULT_AND_AMBIENT_SECOND_DIGITS;
 
+        private int mBatteryLevel;
+        private Paint mInfoPaint;
+
         /**
          * Whether the display supports fewer bits for each color in ambient mode. When true, we
          * disable anti-aliasing in ambient mode.
@@ -220,6 +229,8 @@ public class DigitalWatchFaceService extends CanvasWatchFaceService {
                     ContextCompat.getColor(getApplicationContext(), R.color.digital_am_pm));
             mColonPaint = createTextPaint(
                     ContextCompat.getColor(getApplicationContext(), R.color.digital_colons));
+            mInfoPaint = createTextPaint(
+                    ContextCompat.getColor(getApplicationContext(), R.color.digital_date));
 
             mCalendar = Calendar.getInstance();
             mDate = new Date();
@@ -242,6 +253,16 @@ public class DigitalWatchFaceService extends CanvasWatchFaceService {
             paint.setTypeface(typeface);
             paint.setAntiAlias(true);
             return paint;
+        }
+
+        @Override
+        public void onComplicationDataUpdate(int watchFaceComplicationId, ComplicationData data) {
+            String TAG = "onComplicationDataUpdate";
+            //Log.d(TAG, watchFaceComplicationId + ", type: " + data.getType());
+            if (watchFaceComplicationId == BATTERY_COMPLICATION_ID) {
+                mBatteryLevel = (int) data.getValue();
+                invalidate();
+            }
         }
 
         @Override
@@ -456,8 +477,41 @@ public class DigitalWatchFaceService extends CanvasWatchFaceService {
             return amPm == Calendar.AM ? mAmString : mPmString;
         }
 
+        private float computeBatteryXOffset(String text, Paint paint, Rect watchBounds) {
+//      float centerX = watchBounds.exactCenterX();
+            float rightX = watchBounds.width() / 1.0f;
+            float textLength = paint.measureText(text);
+//      return centerX - (textLength / 2.0f);
+            return (rightX - textLength - 20);
+        }
+
+        private float computeBatteryYOffset(String batteryText, Paint batteryPaint, Rect watchBounds) {
+            Rect textBounds = new Rect();
+            batteryPaint.getTextBounds(batteryText, 0, batteryText.length(), textBounds);
+//      return (watchBounds.bottom - mChinSize) - textBounds.height();
+            return (watchBounds.top + 20) + textBounds.height();
+        }
+
         @Override
         public void onDraw(Canvas canvas, Rect bounds) {
+            // Draw the background.
+            canvas.drawRect(0, 0, bounds.width(), bounds.height(), mBackgroundPaint);
+
+            // draw battery percentage
+//            if (mSettings.isShowBattery()) {
+//            String battery = String.format("%d%%", mBatteryLevel);
+//            float batteryXOffset = computeBatteryXOffset(battery, mInfoPaint, bounds);
+//            float batteryYOffset = computeBatteryYOffset(battery, mInfoPaint, bounds);
+//
+//            canvas.drawText(battery, batteryXOffset, batteryYOffset, mInfoPaint);
+
+            String battery = String.format("%d%%", mBatteryLevel);
+            float batteryXOffset = computeBatteryXOffset(battery, mDatePaint, bounds);
+            float batteryYOffset = computeBatteryYOffset(battery, mDatePaint, bounds);
+
+            canvas.drawText(battery, batteryXOffset, batteryYOffset, mDatePaint);
+//            }
+
             long now = System.currentTimeMillis();
             mCalendar.setTimeInMillis(now);
             mDate.setTime(now);
@@ -466,9 +520,6 @@ public class DigitalWatchFaceService extends CanvasWatchFaceService {
             // Show colons for the first half of each second so the colons blink on when the time
             // updates.
             mShouldDrawColons = (System.currentTimeMillis() % 1000) < 500;
-
-            // Draw the background.
-            canvas.drawRect(0, 0, bounds.width(), bounds.height(), mBackgroundPaint);
 
             // Draw the hours.
             float x = mXOffset;
