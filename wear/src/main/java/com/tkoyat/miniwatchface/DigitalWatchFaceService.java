@@ -403,6 +403,41 @@ public class DigitalWatchFaceService extends CanvasWatchFaceService {
             super.onDestroy();
         }
 
+        @Override
+        public void onTapCommand(@TapType int tapType, int x, int y, long eventTime) {
+            switch (tapType) {
+                case WatchFaceService.TAP_TYPE_TAP:
+                    Log.d(TAG, "WatchFaceService.TAP_TYPE_TAP");
+//                    hideTapHighlight();
+//                    if (withinTapRegion(x, y)) {
+//                        // Implement the tap action
+//                        // (e.g. show detailed step count)
+//                        onWatchFaceTap();
+//                    }
+                    break;
+
+                case WatchFaceService.TAP_TYPE_TOUCH:
+                    Log.d(TAG, "WatchFaceService.TAP_TYPE_TOUCH");
+                    axis = rotateShapeAxis(polyhedronVertices, 30, axis);
+//                    axis = rotateShapeAxis(polyhedronVertices, 30, axis);
+//                    if (withinTapRegion(x, y)) {
+//                        // Provide visual feedback of touch event
+//                        startTapHighlight(x, y, eventTime);
+//                    }
+                    break;
+
+                case WatchFaceService.TAP_TYPE_TOUCH_CANCEL:
+                    Log.d(TAG, "WatchFaceService.TAP_TYPE_TOUCH_CANCEL");
+//                    hideTapHighlight();
+                    break;
+
+                default:
+                    super.onTapCommand(tapType, x, y, eventTime);
+                    break;
+            }
+        }
+
+
         private Paint createTextPaint(int defaultInteractiveColor) {
             return createTextPaint(defaultInteractiveColor, NORMAL_TYPEFACE);
         }
@@ -811,17 +846,6 @@ public class DigitalWatchFaceService extends CanvasWatchFaceService {
                     300,
                     40,
                     mPolyPaint);
-
-            axis = rotateShapeAxis(polyhedronVertices, 30, axis);
-            axis = rotateShapeAxis(polyhedronVertices, 30, axis);
-//            radians = rotateShapeDegree(polyhedronVertices, axis, 30);
-
-//            mDrawPolygonUtil.DrawPolygon(
-//                    canvas,
-//                    polyhedronFaces,
-//                    mCenterX,
-//                    mCenterY,
-//                    1);
         }
 
         // Rotates the shape by an axis received from input
