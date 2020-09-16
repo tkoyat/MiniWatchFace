@@ -22,10 +22,12 @@ import android.content.Intent;
 import android.content.IntentFilter;
 import android.content.res.Resources;
 import android.graphics.Canvas;
+import android.graphics.Color;
 import android.graphics.Paint;
 import android.graphics.Rect;
 import android.graphics.Typeface;
 import android.os.Bundle;
+import android.os.Environment;
 import android.os.Handler;
 import android.os.Message;
 import android.support.wearable.complications.ComplicationData;
@@ -38,6 +40,7 @@ import android.util.Log;
 import android.view.SurfaceHolder;
 import android.view.WindowInsets;
 import androidx.core.content.res.ResourcesCompat;
+import android.content.Context;
 
 import androidx.core.content.ContextCompat;
 import androidx.core.content.res.ResourcesCompat;
@@ -53,12 +56,29 @@ import com.google.android.gms.wearable.DataMap;
 import com.google.android.gms.wearable.DataMapItem;
 import com.google.android.gms.wearable.Wearable;
 
+import java.io.BufferedReader;
+import java.io.ByteArrayInputStream;
+import java.io.FileInputStream;
+import java.io.FileNotFoundException;
+import java.io.FileOutputStream;
+
+import java.io.FileReader;
+import java.io.InputStream;
+import java.io.InputStreamReader;
 import java.text.SimpleDateFormat;
 import java.util.Calendar;
 import java.util.Date;
 import java.util.Locale;
+import java.util.Scanner;
 import java.util.TimeZone;
 import java.util.concurrent.TimeUnit;
+
+
+import com.tkoyat.miniwatchface.util.Face;
+import com.tkoyat.miniwatchface.util.DrawPolygonUtil;
+import com.tkoyat.miniwatchface.util.Vertex;
+
+
 
 /**
  * IMPORTANT NOTE: This watch face is optimized for Wear 1.x. If you want to see a Wear 2.0 watch
@@ -91,6 +111,15 @@ public class DigitalWatchFaceService extends CanvasWatchFaceService {
      */
     private static final long MUTE_UPDATE_RATE_MS = TimeUnit.MINUTES.toMillis(1);
 
+    // Files to work with
+    private String cubeFile = "shapes/Cube.txt";
+    private String tetrahedronFile = "shapes/Tetrahedron.txt";
+    private String octahedronFile = "shapes/Octahedron.txt";
+    private String dodecahedronFile = "shapes/Dodecahedron.txt";
+    private String golfballFile = "shapes/GolfBall.txt";
+    private String stellatedDodecahedronFile = "shapes/StellatedDodecahedron.txt";
+    private String stellatedOctahedronFile = "shapes/StellatedOctahedron.txt";
+
     @Override
     public Engine onCreateEngine() {
         return new Engine();
@@ -113,6 +142,39 @@ public class DigitalWatchFaceService extends CanvasWatchFaceService {
 
         /** How often {@link #mUpdateTimeHandler} ticks in milliseconds. */
         long mInteractiveUpdateRateMs = NORMAL_UPDATE_RATE_MS;
+
+        // Draw poly
+//        private
+        String fileName = octahedronFile;
+
+
+        String graphName = "COMP4420 Project: ";
+        int numVertices = 0;
+        int numFaces = 0; //V-E+F=2
+        int numEdges = 0;
+        Vertex[] polyhedronVertices = null;
+        Vertex newVertex;
+        String vertexDetails;
+        Face[] polyhedronFaces;
+        Vertex viewpoint;
+        int red;
+        int green;
+        int blue;
+        double shapeScale;
+        double radians;
+        String axis;
+
+        // Variables to read in the file.
+        private BufferedReader bufferedReader = null;
+
+        private Context fileContext;
+        private String line = null;
+        //    private String fileName;
+        private Boolean fileRead = false;
+        private Scanner scanner = new Scanner(System.in);
+        private int command = 3;
+
+        private DrawPolygonUtil mDrawPolygonUtil = new DrawPolygonUtil();
 
         /** Handler to update the time periodically in interactive mode. */
         final Handler mUpdateTimeHandler = new Handler() {
@@ -166,6 +228,7 @@ public class DigitalWatchFaceService extends CanvasWatchFaceService {
         Paint mSecondPaint;
         Paint mAmPmPaint;
         Paint mColonPaint;
+        Paint mPolyPaint;
         float mColonWidth;
         boolean mMute;
 
@@ -238,10 +301,12 @@ public class DigitalWatchFaceService extends CanvasWatchFaceService {
             mBackgroundPaint = new Paint();
             mBackgroundPaint.setColor(mInteractiveBackgroundColor);
             mDatePaint = createTextPaint(ContextCompat.getColor(getApplicationContext(), R.color.digital_date));
+
             mHourPaint = createTextPaint(mInteractiveHourDigitsColor, BOLD_TYPEFACE);
             mHourPaint.setAntiAlias(true);
             mHourPaint.setStrokeWidth(2f);
             mHourPaint.setStyle(Paint.Style.FILL);
+
             mMinutePaint = createTextPaint(mInteractiveMinuteDigitsColor);
             mMinutePaint.setAntiAlias(true);
             mMinutePaint.setStrokeWidth(2f);
@@ -250,18 +315,99 @@ public class DigitalWatchFaceService extends CanvasWatchFaceService {
             mAmPmPaint = createTextPaint(ContextCompat.getColor(getApplicationContext(), R.color.digital_am_pm));
             mColonPaint = createTextPaint(ContextCompat.getColor(getApplicationContext(), R.color.digital_colons));
 
+            mPolyPaint = createTextPaint(ContextCompat.getColor(getApplicationContext(), R.color.digital_date));
+            mPolyPaint.setAntiAlias(true);
+            mPolyPaint.setStrokeWidth(2f);
+            mPolyPaint.setStyle(Paint.Style.FILL);
+
+
 
             mProductSans = ResourcesCompat.getFont(getApplicationContext(), R.font.product_sans_regular);
             mProductSansThin = ResourcesCompat.getFont(getApplicationContext(), R.font.product_sans_thin);
 
             mInfoPaint = createTextPaint(ContextCompat.getColor(getApplicationContext(), R.color.digital_date));
-//            mInfoPaint = createTextPaint(mInteractiveHourDigitsColor, BOLD_TYPEFACE);
-//            mHourPaint.setTypeface(mProductSans);
-
 
             mCalendar = Calendar.getInstance();
             mDate = new Date();
             initFormats();
+
+            // Open the file and process the innards.
+            try {
+                // Open the chosen fle.
+//                InputStream inputStream = getResources().openRawResource(R.raw.tetrahedron);  // 3
+//                InputStream inputStream = getResources().openRawResource(R.raw.cube);  // 4
+//                InputStream inputStream = getResources().openRawResource(R.raw.octahedron);  // 6
+//                InputStream inputStream = getResources().openRawResource(R.raw.stellated_octahedron); // 8
+//                InputStream inputStream = getResources().openRawResource(R.raw.dodecahedron);  // 12
+                InputStream inputStream = getResources().openRawResource(R.raw.stellated_dodecahedron);  // 64
+
+
+                InputStreamReader inputReader = new InputStreamReader(inputStream);
+                bufferedReader = new BufferedReader(inputReader);
+
+                // Retrieve the graph name, read the number of vertices, and set of a vertex array.
+                graphName += bufferedReader.readLine();
+                Log.d("fileReader", "fileReader: " + (graphName));
+                numVertices = Integer.parseInt(bufferedReader.readLine());
+                polyhedronVertices = new Vertex[numVertices];
+
+                // Create the vertices read in, with name, and set up an adjacency list of vertices.
+                for (int i = 0; i < numVertices; i++) {
+                    vertexDetails = bufferedReader.readLine();
+                    newVertex = new Vertex(vertexDetails);
+                    polyhedronVertices[i] = newVertex;
+                }
+
+                // Throw away the "0" line.
+                line = bufferedReader.readLine();
+
+                // Add x, y, and z coordinates to the created vertices.
+                for (int j = 0; j < numVertices; j++) {
+                    vertexDetails = bufferedReader.readLine();
+                    polyhedronVertices[j].setCoordinates(vertexDetails);
+                    polyhedronVertices[j].normalize();
+                }
+
+                fileRead = true;
+            } catch (Exception e) {
+                e.printStackTrace();
+            }
+
+            if (true == fileRead) {
+                // Defaults to display the shape on the screen
+                //     at the beginning of running the program.
+                viewpoint = new Vertex();
+                viewpoint.setXCoordinate(0);
+                viewpoint.setYCoordinate(0);
+                viewpoint.setZCoordinate(300);
+                red = 20;
+                green = 215;
+                blue = 45;
+                shapeScale = 100;
+                radians = .2;
+                axis = "x";
+
+                // Tallies the number of edges
+                for (int k = 0; k < numVertices; k++) {
+                    numEdges += polyhedronVertices[k].getNumAdjacentVertices();
+                }
+
+                // Calculates the number of faces, and then
+                //     finds them
+                numFaces = (numEdges/2) - numVertices + 2;
+                polyhedronFaces = findFaces(numFaces, polyhedronVertices);
+
+                //Process the faces to update their properties.
+                for (int k = 0; k < polyhedronFaces.length; k++) {
+                    Log.d(TAG, "polyhedronFaces" + k);
+                    polyhedronFaces[k].processFace(viewpoint);
+                }
+
+                // Sort faces, draw polygon, add polygon to window
+                polyhedronFaces = sortFaces(polyhedronFaces);
+//                DrawPolygon dp = new DrawPolygon(polyhedronFaces, red, green, blue, shapeScale);
+//                window.add(dp);
+            }
         }
 
         @Override
@@ -434,9 +580,13 @@ public class DigitalWatchFaceService extends CanvasWatchFaceService {
             if (mLowBitAmbient) {
                 mHourPaint.setStyle(Paint.Style.FILL);
                 mMinutePaint.setStyle(Paint.Style.FILL);
+                mPolyPaint.setStyle(Paint.Style.FILL);
+//                mPolyPaint.setColor(Color.BLUE);
             } else {
                 mHourPaint.setStyle(Paint.Style.STROKE);
                 mMinutePaint.setStyle(Paint.Style.STROKE);
+                mPolyPaint.setStyle(Paint.Style.STROKE);
+//                mPolyPaint.setColor(Color.WHITE);
             }
 
             boolean antiAlias = mLowBitAmbient;
@@ -538,6 +688,58 @@ public class DigitalWatchFaceService extends CanvasWatchFaceService {
             return (watchBounds.top + 20) + textBounds.height();
         }
 
+        public Face[] sortFaces(Face[] faces) {
+            Face tempFace;
+
+            for (int i = 0; i < faces.length - 1; i++) {
+                for (int j = 0; j < faces.length - i - 1; j++ ) {
+                    if (faces[j].getDistance() < faces[j+1].getDistance()) {
+                        tempFace = faces[j];
+                        faces[j] = faces[j+1];
+                        faces[j+1] = tempFace;
+                    }
+                }
+            }
+
+            return faces;
+        }
+
+        // Find the faces of the polyhedron
+        public Face[] findFaces(int numberFaces, Vertex[] polyhedronVertices) {
+            Face[] shapeFaces = new Face[numberFaces];
+            int starting, past, present, future;
+            int foundFaces = 0;
+            Face temporaryFace;
+
+            Log.d("findFaces", "polyhedronVertices.length: " + (polyhedronVertices.length));
+
+            for (int j = 0; j < polyhedronVertices.length; j++) {
+                for (int i = 0; i < polyhedronVertices[j].getNumAdjacentVertices(); i++) {
+                    temporaryFace = new Face();
+                    past = polyhedronVertices[j].getName();
+                    starting = past;
+                    temporaryFace.addVertex(polyhedronVertices[j]);
+                    present = polyhedronVertices[past-1].getVertex(i);
+                    temporaryFace.addVertex(polyhedronVertices[present-1]);
+                    future = polyhedronVertices[present-1].getNextVertex(past);
+
+                    while (starting != future) {
+                        temporaryFace.addVertex(polyhedronVertices[future-1]);
+                        past = present;
+                        present = future;
+                        future = polyhedronVertices[present-1].getNextVertex(past);
+                    }
+
+                    if (temporaryFace.newFace(shapeFaces, foundFaces)) {
+                        shapeFaces[foundFaces] = temporaryFace;
+                        foundFaces++;
+                    }
+                }
+            }
+
+            return shapeFaces;
+        }
+
         @Override
         public void onDraw(Canvas canvas, Rect bounds) {
             // Log.d(TAG, "onDraw");
@@ -613,6 +815,60 @@ public class DigitalWatchFaceService extends CanvasWatchFaceService {
                         mDayOfWeekFormat.format(mDate),
                         mXOffset, mYOffset + mLineHeight * 2, mDatePaint);
             }
+
+            // plot polygon
+            mDrawPolygonUtil.DrawPolygon(
+                    canvas,
+                    polyhedronFaces,
+                    250,
+                    300,
+                    40,
+                    mPolyPaint);
+
+            axis = rotateShapeAxis(polyhedronVertices, 30, axis);
+            axis = rotateShapeAxis(polyhedronVertices, 30, axis);
+//            radians = rotateShapeDegree(polyhedronVertices, axis, 30);
+
+//            mDrawPolygonUtil.DrawPolygon(
+//                    canvas,
+//                    polyhedronFaces,
+//                    mCenterX,
+//                    mCenterY,
+//                    1);
+        }
+
+        // Rotates the shape by an axis received from input
+        public String rotateShapeAxis(Vertex[] vertices, double radians, String axis) {
+//            do {
+//                System.out.print("Please enter the axis: ");
+////                axis = scanner.next();
+//            } while(!(axis.equals("x") || axis.equals("X")
+//                    || axis.equals("y") || axis.equals("Y")
+//                    || axis.equals("z") || axis.equals("Z")));
+
+            for (int k = 0; k < vertices.length; k++) {
+                vertices[k].rotateVertex(axis, radians);
+                vertices[k].normalize();
+            }
+
+            return axis;
+        }
+
+        // Rotates the shape by a degree received from input
+        public double rotateShapeDegree(Vertex[] vertices, String axis, double radians) {
+//            do{
+//                System.out.print("Please enter the degree: ");
+////                radians = scanner.nextDouble();
+//            }while(!(radians > 0 && radians < 360));
+
+            radians = Math.toRadians(radians);
+
+            for (int k = 0; k < vertices.length; k++) {
+                vertices[k].rotateVertex(axis, radians);
+                vertices[k].normalize();
+            }
+
+            return radians;
         }
 
         /**

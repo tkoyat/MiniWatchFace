@@ -39,6 +39,14 @@
   <string name="add_complication">Add Complication</string>
 <!--  <string name="edit_complication">Edit Complication <xliff:g id="name" example="World Clock">%1$s</xliff:g></string>-->
 
+<!--  <string name="cube_file">shapes/Cube.txt</string>-->
+<!--  <string name="tetrahedron_file">shapes/Tetrahedron.txt</string>-->
+<!--  <string name="octahedron_file">shapes/Octahedron.txt</string>-->
+<!--  <string name="dodecahedron_file">shapes/Dodecahedron.txt</string>-->
+<!--  <string name="golfball_file">shapes/GolfBall.txt</string>-->
+<!--  <string name="stellatedDodecahedron_file">shapes/StellatedDodecahedron.txt</string>-->
+<!--  <string name="stellatedOctahedron_file">shapes/StellatedOctahedron.txt</string>-->
+
   <string-array name="color_array">
     <item>@string/color_black</item>
     <item>@string/color_blue</item>
