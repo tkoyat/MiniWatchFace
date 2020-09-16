@@ -217,7 +217,9 @@ public class DigitalWatchFaceService extends CanvasWatchFaceService {
             super.onCreate(holder);
 
             // Called when new complication data is received.
-            setDefaultSystemComplicationProvider(BATTERY_COMPLICATION_ID, SystemProviders.WATCH_BATTERY,
+            setDefaultSystemComplicationProvider(
+                    BATTERY_COMPLICATION_ID,
+                    SystemProviders.WATCH_BATTERY,
                     ComplicationData.TYPE_RANGED_VALUE);
 
             setWatchFaceStyle(new WatchFaceStyle.Builder(DigitalWatchFaceService.this)
@@ -237,7 +239,13 @@ public class DigitalWatchFaceService extends CanvasWatchFaceService {
             mBackgroundPaint.setColor(mInteractiveBackgroundColor);
             mDatePaint = createTextPaint(ContextCompat.getColor(getApplicationContext(), R.color.digital_date));
             mHourPaint = createTextPaint(mInteractiveHourDigitsColor, BOLD_TYPEFACE);
+            mHourPaint.setAntiAlias(true);
+            mHourPaint.setStrokeWidth(2f);
+            mHourPaint.setStyle(Paint.Style.FILL);
             mMinutePaint = createTextPaint(mInteractiveMinuteDigitsColor);
+            mMinutePaint.setAntiAlias(true);
+            mMinutePaint.setStrokeWidth(2f);
+            mMinutePaint.setStyle(Paint.Style.FILL);
             mSecondPaint = createTextPaint(mInteractiveSecondDigitsColor);
             mAmPmPaint = createTextPaint(ContextCompat.getColor(getApplicationContext(), R.color.digital_am_pm));
             mColonPaint = createTextPaint(ContextCompat.getColor(getApplicationContext(), R.color.digital_colons));
@@ -248,9 +256,8 @@ public class DigitalWatchFaceService extends CanvasWatchFaceService {
 
             mInfoPaint = createTextPaint(ContextCompat.getColor(getApplicationContext(), R.color.digital_date));
 //            mInfoPaint = createTextPaint(mInteractiveHourDigitsColor, BOLD_TYPEFACE);
-            mHourPaint.setTypeface(mProductSans);
-            mHourPaint.setAntiAlias(true);
-            mHourPaint.setStrokeWidth(2f);
+//            mHourPaint.setTypeface(mProductSans);
+
 
             mCalendar = Calendar.getInstance();
             mDate = new Date();
@@ -384,10 +391,10 @@ public class DigitalWatchFaceService extends CanvasWatchFaceService {
 
             mLowBitAmbient = properties.getBoolean(PROPERTY_LOW_BIT_AMBIENT, false);
 
-            if (Log.isLoggable(TAG, Log.DEBUG)) {
+//            if (Log.isLoggable(TAG, Log.DEBUG)) {
                 Log.d(TAG, "onPropertiesChanged: burn-in protection = " + burnInProtection
                         + ", low-bit ambient = " + mLowBitAmbient);
-            }
+//            }
         }
 
         @Override
@@ -402,34 +409,43 @@ public class DigitalWatchFaceService extends CanvasWatchFaceService {
         @Override
         public void onAmbientModeChanged(boolean inAmbientMode) {
             super.onAmbientModeChanged(inAmbientMode);
-            if (Log.isLoggable(TAG, Log.DEBUG)) {
-                Log.d(TAG, "onAmbientModeChanged: " + inAmbientMode);
-            }
+
+            mLowBitAmbient = !inAmbientMode;
+            updatePaintConfig();
+
+            invalidate();
+
+            // Whether the timer should be running depends on whether we're in ambient mode (as well
+            // as whether we're visible), so we may need to start or stop the timer.
+            updateTimer();
+        }
+
+        // update font when light changed
+        private void updatePaintConfig() {
+//            Log.d(TAG, "updateFontConfig " + mLowBitAmbient  );
+
             adjustPaintColorToCurrentMode(mBackgroundPaint, mInteractiveBackgroundColor,
                     DigitalWatchFaceUtil.COLOR_VALUE_DEFAULT_AND_AMBIENT_BACKGROUND);
             adjustPaintColorToCurrentMode(mHourPaint, mInteractiveHourDigitsColor,
                     DigitalWatchFaceUtil.COLOR_VALUE_DEFAULT_AND_AMBIENT_HOUR_DIGITS);
             adjustPaintColorToCurrentMode(mMinutePaint, mInteractiveMinuteDigitsColor,
                     DigitalWatchFaceUtil.COLOR_VALUE_DEFAULT_AND_AMBIENT_MINUTE_DIGITS);
-            // Actually, the seconds are not rendered in the ambient mode, so we could pass just any
-            // value as ambientColor here.
-//            adjustPaintColorToCurrentMode(mSecondPaint, mInteractiveSecondDigitsColor,
-//                    DigitalWatchFaceUtil.COLOR_VALUE_DEFAULT_AND_AMBIENT_SECOND_DIGITS);
 
             if (mLowBitAmbient) {
-                boolean antiAlias = !inAmbientMode;
-                mDatePaint.setAntiAlias(antiAlias);
-                mHourPaint.setAntiAlias(antiAlias);
-                mMinutePaint.setAntiAlias(antiAlias);
-                mSecondPaint.setAntiAlias(antiAlias);
-                mAmPmPaint.setAntiAlias(antiAlias);
-                mColonPaint.setAntiAlias(antiAlias);
+                mHourPaint.setStyle(Paint.Style.FILL);
+                mMinutePaint.setStyle(Paint.Style.FILL);
+            } else {
+                mHourPaint.setStyle(Paint.Style.STROKE);
+                mMinutePaint.setStyle(Paint.Style.STROKE);
             }
-            invalidate();
 
-            // Whether the timer should be running depends on whether we're in ambient mode (as well
-            // as whether we're visible), so we may need to start or stop the timer.
-            updateTimer();
+            boolean antiAlias = mLowBitAmbient;
+            mDatePaint.setAntiAlias(antiAlias);
+            mHourPaint.setAntiAlias(antiAlias);
+            mMinutePaint.setAntiAlias(antiAlias);
+            mSecondPaint.setAntiAlias(antiAlias);
+            mAmPmPaint.setAntiAlias(antiAlias);
+            mColonPaint.setAntiAlias(antiAlias);
         }
 
         private void adjustPaintColorToCurrentMode(Paint paint, int interactiveColor,
@@ -524,31 +540,24 @@ public class DigitalWatchFaceService extends CanvasWatchFaceService {
 
         @Override
         public void onDraw(Canvas canvas, Rect bounds) {
+            // Log.d(TAG, "onDraw");
+
             // Draw the background.
             canvas.drawRect(0, 0, bounds.width(), bounds.height(), mBackgroundPaint);
 
             // draw battery percentage
-//            if (mSettings.isShowBattery()) {
             String battery = String.format("%d%%", mBatteryLevel);
             float batteryXOffset = computeBatteryXOffset(battery, mInfoPaint, bounds);
             float batteryYOffset = computeBatteryYOffset(battery, mInfoPaint, bounds);
 
             canvas.drawText(battery, batteryXOffset, batteryYOffset, mInfoPaint);
 
-//            String battery = String.format("%d%%", mBatteryLevel);
-//            float batteryXOffset = computeBatteryXOffset(battery, mDatePaint, bounds);
-//            float batteryYOffset = computeBatteryYOffset(battery, mDatePaint, bounds);
-//
-//            canvas.drawText(battery, batteryXOffset, batteryYOffset, mDatePaint);
-//            }
-
             long now = System.currentTimeMillis();
             mCalendar.setTimeInMillis(now);
             mDate.setTime(now);
             boolean is24Hour = DateFormat.is24HourFormat(DigitalWatchFaceService.this);
 
-            // Show colons for the first half of each second so the colons blink on when the time
-            // updates.
+            // Show colons for the first half of each second so the colons blink on when the time updates.
             mShouldDrawColons = (System.currentTimeMillis() % 1000) < 500;
 
             // Draw the hours.
@@ -667,6 +676,8 @@ public class DigitalWatchFaceService extends CanvasWatchFaceService {
                 if (dataEvent.getType() != DataEvent.TYPE_CHANGED) {
                     continue;
                 }
+
+//                updateFontConfig();
 
                 DataItem dataItem = dataEvent.getDataItem();
                 if (!dataItem.getUri().getPath().equals(
