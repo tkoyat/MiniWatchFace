@@ -111,15 +111,6 @@ public class DigitalWatchFaceService extends CanvasWatchFaceService {
      */
     private static final long MUTE_UPDATE_RATE_MS = TimeUnit.MINUTES.toMillis(1);
 
-    // Files to work with
-    private String cubeFile = "shapes/Cube.txt";
-    private String tetrahedronFile = "shapes/Tetrahedron.txt";
-    private String octahedronFile = "shapes/Octahedron.txt";
-    private String dodecahedronFile = "shapes/Dodecahedron.txt";
-    private String golfballFile = "shapes/GolfBall.txt";
-    private String stellatedDodecahedronFile = "shapes/StellatedDodecahedron.txt";
-    private String stellatedOctahedronFile = "shapes/StellatedOctahedron.txt";
-
     @Override
     public Engine onCreateEngine() {
         return new Engine();
@@ -144,10 +135,6 @@ public class DigitalWatchFaceService extends CanvasWatchFaceService {
         long mInteractiveUpdateRateMs = NORMAL_UPDATE_RATE_MS;
 
         // Draw poly
-//        private
-        String fileName = octahedronFile;
-
-
         String graphName = "COMP4420 Project: ";
         int numVertices = 0;
         int numFaces = 0; //V-E+F=2
